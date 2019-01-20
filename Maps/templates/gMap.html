@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Snow-i</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height:85%;
+        width:100%;
+        margin-top: 0%;
+        margin-bottom: 0%;
+        margin-left: 0%;
+        position: absolute;
+        z-index: 1;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      img{
+          border-radius: 25px;
+          position: absolute;
+          {#height: 124px;#}
+          {#width: 186px;#}
+          margin-top: 10%;
+          margin-left: 1%;
+          background-image: url("\Logo.jpeg");
+          background-size: 100% 100%;
+          z-index: 4;
+      }
+      #myRange {
+
+          position: absolute;
+          margin-top: 12%;
+          margin-left: 1%;
+          z-index: 2;
+      }
+        .slider {
+  -webkit-appearance: none;
+  width: 186px;
+  height: 15px;
+  border-radius: 5px;
+  background: #515A5A;
+  outline: none;
+  opacity: 0.8;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #3498DB;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #3498DB;
+  cursor: pointer;
+}
+    </style>
+  </head>
+  <body>
+{#    <div id="box1"><</div>#}
+<img src="Logo.jpeg" height="124" width="186">
+    <!--Weather widget found at: https://weatherwidget.io/-->
+    <a class="weatherwidget-io" href="https://forecast7.com/en/45d50n73d57/montreal/" data-label_1="MONTREAL" data-label_2="WEATHER" data-theme="original" >MONTREAL WEATHER</a>
+    <script>
+        !function(d,s,id){
+            var js,fjs=d.getElementsByTagName(s)[0];
+            if(!d.getElementById(id)){
+                js=d.createElement(s);
+                js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';
+                fjs.parentNode.insertBefore(js,fjs);
+            }
+        }
+        (document,'script','weatherwidget-io-js');
+    </script>
+    <input type="range" min="0" max="4" value="0" class="slider" id="myRange" onchange="refreshMap(this.value)">
+    <div id="map"></div>
+    <script>
+      function initMap() {
+        var directionsDisplay = new google.maps.DirectionsRenderer;
+        var directionsService = new google.maps.DirectionsService;
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat:45.557498,lng:-73.599065},
+            zoom: 14
+        });
+        directionsDisplay.setMap(map);
+
+        var directionsDisplay1 = new google.maps.DirectionsRenderer({
+            map: map,
+            preserveViewport: true,
+            suppressMarkers: true,
+            polylineOptions: {
+            strokeColor: "#FF0000"
+            }
+        });
+        directionsService.route({
+        origin: {lat:{{ route1.startX }},lng:{{ route1.startY }}},
+        destination: {lat:{{ route1.endX }},lng:{{ route1.endY }}},
+        travelMode: google.maps.TravelMode.DRIVING
+        },
+        function(response, status) {
+            if (status === google.maps.DirectionsStatus.OK) {
+                directionsDisplay1.setDirections(response);
+            }
+            else {
+                window.alert('Directions request failed due to 4' + status);
+            }
+        });
+
+        var directionsDisplay2 = new google.maps.DirectionsRenderer({
+            map: map,
+            preserveViewport: true,
+            suppressMarkers: true,
+            polylineOptions: {
+            strokeColor: "#FF0000"
+            }
+        });
+        directionsService.route({
+        origin: {lat:{{ route2.startX }},lng:{{ route2.startY }}},
+        destination: {lat:{{ route2.endX }},lng:{{ route2.endY }}},
+        travelMode: google.maps.TravelMode.DRIVING
+        },
+        function(response, status) {
+            if (status === google.maps.DirectionsStatus.OK) {
+                directionsDisplay2.setDirections(response);
+            }
+            else {
+                window.alert('Directions request failed due to 3' + status);
+            }
+        });
+
+          {% for parking in parkings %}
+            var lati = {{ parking.y }}
+            var longi = {{ parking.x }}
+            var pos = {lat:lati, lng:longi};
+            var marker = new google.maps.Marker({
+            position: pos,
+            map: map,
+            icon: {url: 'https://maps.google.com/mapfiles/kml/shapes/parking_lot_maps.png', scaledSize: new google.maps.Size(22, 22)}
+            });
+            {% endfor %}
+      }
+
+    </script>
+
+    <script>
+        function refreshMap(slideAmount)
+        {
+            var directionsDisplay = new google.maps.DirectionsRenderer;
+            var directionsService = new google.maps.DirectionsService;
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat:45.557498,lng:-73.599065},
+                zoom: 14
+            });
+            directionsDisplay.setMap(map);
+
+            {% for parking in parkings %}
+            var lati = {{ parking.y }}
+            var longi = {{ parking.x }}
+            var pos = {lat:lati, lng:longi};
+            var marker = new google.maps.Marker({
+            position: pos,
+            map: map,
+            icon: {url: 'https://maps.google.com/mapfiles/kml/shapes/parking_lot_maps.png', scaledSize: new google.maps.Size(22, 22)}
+            });
+            {% endfor %}
+
+            var i = slideAmount;
+
+
+            if(i == 0){
+                var directionsDisplay1 = new google.maps.DirectionsRenderer({
+                map: map,
+                preserveViewport: true,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#FF0000"
+                }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route1.startX }},lng:{{ route1.startY }}},
+                    destination: {lat:{{ route1.endX }},lng:{{ route1.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status)
+                {
+                    if (status === google.maps.DirectionsStatus.OK)
+                    {
+                        directionsDisplay1.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 1' + status);
+                    }
+                });
+
+                var directionsDisplay2 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: "#FF0000"
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route2.startX }},lng:{{ route2.startY }}},
+                    destination: {lat:{{ route2.endX }},lng:{{ route2.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay2.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+            }
+
+            if(i == 1){
+
+                var directionsDisplay1 = new google.maps.DirectionsRenderer({
+                map: map,
+                preserveViewport: true,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#FF0000"
+                }
+                });
+                directionsService.route({
+                    origin: {lat:45.553948,lng:-73.622738},
+                    destination: {lat:{{ route1.endX }},lng:{{ route1.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status)
+                {
+                    if (status === google.maps.DirectionsStatus.OK)
+                    {
+                        directionsDisplay1.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 1' + status);
+                    }
+                });
+
+                var directionsDisplay2 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: "#FF0000"
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:45.557498,lng:-73.599065},
+                    destination: {lat:{{ route2.endX }},lng:{{ route2.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay2.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+
+
+                var directionsDisplay3 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route2.startX }},lng:{{ route2.startY }}},
+                    destination: {lat:45.557498,lng:-73.599065},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay3.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+                var directionsDisplay7 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route1.startX }},lng:{{ route1.startY }}},
+                    destination: {lat:45.553948,lng:-73.622738},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay7.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+            }
+
+            if(i == 2){
+
+
+                var directionsDisplay1 = new google.maps.DirectionsRenderer({
+                map: map,
+                preserveViewport: true,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#FF0000"
+                }
+                });
+                directionsService.route({
+                    origin: {lat:45.558138,lng:-73.612381},
+                    destination: {lat:{{ route1.endX }},lng:{{ route1.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status)
+                {
+                    if (status === google.maps.DirectionsStatus.OK)
+                    {
+                        directionsDisplay1.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 1' + status);
+                    }
+                });
+
+                var directionsDisplay2 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: "#FF0000"
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:45.551992,lng:-73.581525},
+                    destination: {lat:{{ route2.endX }},lng:{{ route2.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay2.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+
+                var directionsDisplay4 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route2.startX }},lng:{{ route2.startY }}},
+                    destination: {lat:45.551992,lng:-73.581525},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay4.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+                var directionsDisplay8 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route1.startX }},lng:{{ route1.startY }}},
+                    destination: {lat:45.558138,lng:-73.612381},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay8.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+            }
+
+            if(i == 3){
+
+
+                var directionsDisplay1 = new google.maps.DirectionsRenderer({
+                map: map,
+                preserveViewport: true,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#FF0000"
+                }
+                });
+                directionsService.route({
+                    origin: {lat:45.552199,lng:-73.598512},
+                    destination: {lat:{{ route1.endX }},lng:{{ route1.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status)
+                {
+                    if (status === google.maps.DirectionsStatus.OK)
+                    {
+                        directionsDisplay1.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 1' + status);
+                    }
+                });
+
+                var directionsDisplay2 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: "#FF0000"
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:45.560953,lng:-73.573585},
+                    destination: {lat:{{ route2.endX }},lng:{{ route2.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay2.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+
+                var directionsDisplay5 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route2.startX }},lng:{{ route2.startY }}},
+                    destination: {lat:45.560953,lng:-73.573585},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay5.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+                var directionsDisplay9 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route1.startX }},lng:{{ route1.startY }}},
+                    destination: {lat:45.552199,lng:-73.598512},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay9.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+            }
+
+            if(i == 4){
+                var directionsDisplay6 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route2.startX }},lng:{{ route2.startY }}},
+                    destination: {lat:{{ route2.endX }},lng:{{ route2.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay6.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+
+                var directionsDisplay10 = new google.maps.DirectionsRenderer({
+                    map: map,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: "#392fff",
+                        strokeWeight: 5
+                    }
+                });
+                directionsService.route({
+                    origin: {lat:{{ route1.startX }},lng:{{ route1.startY }}},
+                    destination: {lat:{{ route1.endX }},lng:{{ route1.endY }}},
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                function(response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsDisplay10.setDirections(response);
+                    }
+                    else {
+                        window.alert('Directions request failed due to 2' + status);
+                    }
+                });
+            }
+
+        }
+
+     </script>
+
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFMUi-JlLRtimzK10PzfsHjMBsg_4D9fE&callback=initMap">
+    </script>
+  </body>
+</html>
