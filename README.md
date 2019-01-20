@@ -29,3 +29,5 @@ développer une application web.
 La prochaine étape pour Snow-i est d'analyser l'implémentation d'un système de géolocalisation 
 à puces et d'intégrer celui-ci à notre application web pour avoir un feedback continu des 
 déplacements des appareils routiers.
+
+Snow-i, Inc.
